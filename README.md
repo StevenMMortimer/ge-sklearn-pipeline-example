@@ -64,28 +64,27 @@ expectations to ensure the integrity of the analysis.
 
 In **scikit-learn** there is functionality where you can take multiple "transformers" 
 and chain them together to preprocess data and model it. The [`main.py`](main.py) 
-file is where these transformers preprocess the raw data located in [`data/raw-data.csv`](./data/raw-data.csv). 
+file is where these transformers preprocess the raw data from in [`data/raw-data.csv`](./data/raw-data.csv). 
 Here we will introduce the Great Expectations (`ge`) library in three key areas to 
 validate assumptions about data in our pipeline: 
 
 1. Use `ge` to check the raw data
-2. Use `ge` to check the data after preprocessing, which is right before modeling
-3. Use `ge` to check the difference between predicted and actuals in a holdout dataset
+2. Use `ge` to check the data after preprocessing (which is right before modeling)
+3. Use `ge` to check the difference between actuals and predictions on a holdout dataset
 
-First, it is pretty obvious that Great Expectations could be used to validate the input, raw data. 
+First, it is pretty obvious that Great Expectations could be used to validate the inputted raw data. 
 The phrase "garbage in, garbage out" applies here. It does not matter how good our 
 pipeline is if we put bad data into it, so we prevent that from happening.
 
 Second, checking preprocessed data is also important. This ensures that all of your transformers 
 behaved as you would expect in case they encoded data incorrectly or changed in another 
-environment if you pickle them after fitting them to data, etc. Even another analyst 
-could tweak a transformer parameter in `main.py` which is running the analysis and 
-the pipeline tests, if written correctly, should catch the change in parameters of 
-the transformers. This is extremely helpful in ensuring the data you are modeling 
-is what you expect.
+environment where you load them from, etc. For example, another analyst could tweak 
+a transformer parameter in `main.py` which is running the analysis and the pipeline tests, 
+if written correctly, should catch the change in parameters of the transformers. 
+This is extremely helpful in ensuring the data you are modeling is what you expect.
 
 Third, we check the model errors on a holdout set. This is also important in ensuring 
-that there are no extremely large errors caused by drift in the inputs, outliers, or a 
+that there are no extremely large errors caused by a drift in the inputs, outliers, or a 
 decline in model performance.
 
 
