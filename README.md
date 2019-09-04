@@ -89,29 +89,40 @@ great_expectations init
 When following the prompts we declined to initialize a Datasource. Instead we 
 created the Datasources with the script [`set-datasources`](./great_expectations/notebooks/set-datasources.py). 
 This allows you to specify both at once in a consistent manner. You can always check 
-which data assets are available from the sources by running the following commands 
-in Python: 
+which DataAssets are available from Datasources by running the commands below 
+in Python. This should show the three DataAssets from the `.csv` files: 1) `raw-data`, 
+2) `modeling-data`, and 3) `holdout-error-data`.  
 
 ```
 import great_expectations as ge
 import great_expectations.jupyter_ux
 context = ge.data_context.DataContext()
 great_expectations.jupyter_ux.list_available_data_asset_names(context)
+
+data_source: data__dir (pandas)
+  generator_name: default (subdir_reader)
+    generator_asset: raw-data
+data_source: output__dir (pandas)
+  generator_name: default (subdir_reader)
+    generator_asset: modeling-data
+    generator_asset: holdout-error-data
 ```
 
-This should show the three DataAssets: 1) Raw data, 2) Modeling data, and 3) Holdout 
-Error data. The next step is creating expectations for these three DataAssets. The 
-expectations we used were created and stored in the following scripts: 
+The next step is creating expectations for these three DataAssets. The expectations 
+we used were created and stored in the following scripts: 
 
 1. Raw data: [./great_expectations/notebooks/create-raw-data-expectations.py](./great_expectations/notebooks/create-raw-data-expectations.py)
 2. Modeling data: [./great_expectations/notebooks/create-modeling-data-expectations.py](./great_expectations/notebooks/create-modeling-data-expectations.py)
 3. Holdout error data: [./great_expectations/notebooks/create-holdout-error-data-expectations.py](./great_expectations/notebooks/create-holdout-error-data-expectations.py)
 
-You will notice these scripts all follow a similar pattern where we add the basic profiler 
-as an expectation for the DataAsset and then create expectations as the "default" suite 
-by loading the data from the folder as a Batch. The choice to use `.py` scripts 
-instead of a notebook are purely personal taste. They are stored in the `notebooks` 
-folder for reference just like a notebook would be.  
+All of the expectation creation scripts follow a similar pattern where we first add the basic profiler 
+as an expectation for the DataAsset and second create expectations as the "default" suite. 
+Those default expectations are created by loading the data from the folder as a Batch and 
+only need to be done once for the first time unless you are updating the expectations.
+
+The choice to use `.py` scripts instead of notebooks is purely for personal preference. 
+The scripts are stored in the notebooks folder [`./great_expectations/notebooks`](./great_expectations/notebooks) 
+for reference just like a notebook would be.  
 
 
 ---
