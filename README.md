@@ -105,7 +105,7 @@ great_expectations init
 
 In the initialization prompts we declined to add a DataSource. By declining the DataSource 
 configuration we were able to quickly and consistently setup multiple DataSources by 
-running the script [`set-datasources`](./great_expectations/notebooks/set-datasources.py). 
+running the script [`set-datasources.py`](./great_expectations/notebooks/set-datasources.py). 
 You can always check which DataAssets are available from DataSources by running the commands below 
 in Python. This should show the three DataAssets from the `.csv` files: 1) `raw-data`, 
 2) `modeling-data`, and 3) `holdout-error-data`.  
@@ -126,7 +126,7 @@ data_source: output__dir (pandas)
 ```
 
 The next step is creating expectations for these three DataAssets. The expectations 
-we used were created by the following scripts: 
+were created by the following scripts: 
 
 1. Raw data: [./great_expectations/notebooks/create-raw-data-expectations.py](./great_expectations/notebooks/create-raw-data-expectations.py)
 2. Modeling data: [./great_expectations/notebooks/create-modeling-data-expectations.py](./great_expectations/notebooks/create-modeling-data-expectations.py)
