@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 
+import sys
 import pandas as pd
 import numpy as np
+from joblib import load
 
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, KBinsDiscretizer, FunctionTransformer
 from sklearn.ensemble import RandomForestRegressor
@@ -17,6 +19,13 @@ from lib.transformers import ftransformer_cut, ColumnSelector
 
 if __name__ == "__main__":
 
+    # Check if the user supplied any cases which demonstrate the ability for
+    # Great Expectations to catch differences in what is expected from the data
+    if len(sys.argv) == 2:
+        passed_scenario = sys.argv[1]
+    else:
+        passed_scenario = None
+
     # Create our great_expectations context
     context = ge.data_context.DataContext()
 
@@ -25,12 +34,24 @@ if __name__ == "__main__":
     # NOTE: The expectations for this data asset were defined in the
     # file entitled ''. That file must be run to create and save the expectation
     # suite that is being used here to validate the new batches.
-    raw_dat = pd.read_csv('data/raw-data.csv')
+    if passed_scenario == 'missing-column':
+        raw_dat = pd.read_csv('scenarios/raw-data-missing-column.csv')
+    else:
+        raw_dat = pd.read_csv('data/raw-data.csv')
     data_asset_name = "raw-data"
     expectation_suite_name = "default"
     batch = context.get_batch(data_asset_name, expectation_suite_name, raw_dat)
     run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
     validation_result_raw_dat = batch.validate(run_id=run_id)
+
+    if validation_result_raw_dat["success"]:
+        print('Successfully validated raw data.')
+    else:
+        print('The following raw data expectations failed:')
+        for k in validation_result_raw_dat['results']:
+            if not k['success']:
+                print(k['expectation_config'])
+
     assert validation_result_raw_dat["success"]
 
     # Transform data ----------------------------------------------------------------------
@@ -51,10 +72,14 @@ if __name__ == "__main__":
     ft = FunctionTransformer(ftransformer_cut,
                              kw_args={'bins': np.linspace(0, 1, 5)})
 
-    # Create a transformer to bin wing_density into 2 quantiles
-    kbd = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='quantile')
-    kbd_cols = raw_dat.loc[:, ['wing_density']]
-    kbd.fit(kbd_cols)
+    if passed_scenario == 'different-transformer':
+        # Load an unexpected transformer that bins wing_density into 4 quantiles
+        kbd = load('./scenarios/kbd.joblib')
+    else:
+        # Create a transformer to bin wing_density into 2 quantiles
+        kbd = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='quantile')
+        kbd_cols = raw_dat.loc[:, ['wing_density']]
+        kbd.fit(kbd_cols)
 
     # String together the created transformers into a sklearn "pipeline"
     preprocess_pipeline = make_pipeline(
@@ -86,6 +111,9 @@ if __name__ == "__main__":
     # main.py is run, but could be pickled and loaded so that they are
     # consistent across runs and batches.
     modeling_dat = preprocess_pipeline.transform(raw_dat)
+
+    # Convert the numpy ndarray to a dataframe to write out as CSV and
+    # check the expectations
     modeling_cols = ['V' + str(x) for x in range(modeling_dat.shape[1])]
     modeling_dat_as_df = pd.DataFrame(modeling_dat, columns=modeling_cols)
     modeling_dat_as_df.to_csv('./output/modeling-data.csv', index=False)
@@ -99,6 +127,15 @@ if __name__ == "__main__":
     expectation_suite_name = "default"
     batch = context.get_batch(data_asset_name, expectation_suite_name, modeling_dat_as_df)
     validation_result_modeling_dat = batch.validate(run_id=run_id)
+
+    if validation_result_modeling_dat["success"]:
+        print('Successfully validated modeling data.')
+    else:
+        print('The following modeling data expectations failed:')
+        for k in validation_result_modeling_dat['results']:
+            if not k['success']:
+                print(k['expectation_config'])
+
     assert validation_result_modeling_dat["success"]
 
     # Model the data -----------------------------------------------------------------------
@@ -123,7 +160,12 @@ if __name__ == "__main__":
     param_grid = {'rf__n_estimators': [50, 100, 150], 'rf__max_depth': [10, 20, 30]}
     rf_cv = GridSearchCV(modeling_pipeline, param_grid, iid=False, cv=2)
     rf_cv.fit(X_train, y_train)
-    print(f"Tuned Hyperparameters: {rf_cv.best_params_}")
+    rf_tuned_hyperparameters = rf_cv.best_params_
+
+    if passed_scenario == 'holdout-outlier':
+        # Update the test value to be a complete outlier so that the expectations
+        # will not pass on the holdout error data.
+        y_test[0] = 999.99
 
     # Save off the holdout predictions and errors
     y_pred_tuned_forest = rf_cv.predict(X_test)
@@ -140,4 +182,13 @@ if __name__ == "__main__":
     expectation_suite_name = "default"
     batch = context.get_batch(data_asset_name, expectation_suite_name, holdout_error_dat)
     validation_result_holdout_error_dat = batch.validate(run_id=run_id)
+
+    if validation_result_holdout_error_dat["success"]:
+        print('Successfully validated holdout error data.')
+    else:
+        print('The following holdout error data expectations failed:')
+        for k in validation_result_holdout_error_dat['results']:
+            if not k['success']:
+                print(k['expectation_config'])
+
     assert validation_result_holdout_error_dat["success"]
