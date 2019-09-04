@@ -19,10 +19,11 @@ inputs, transformed data, and even the model predictions conform to an expected 
 ### Background
 
 In this example assume that we want to build a machine learning pipeline to 
-estimate the weight of two species of birds. Along with the species we have other 
-attributes such as, color, beak_ratio, claw_length, and wing_density. The raw data 
-is available at [data/raw-data.csv](./data/raw-data.csv).Please note that this is fake 
-data that was generated using the script [lib/datagenerator.py](./lib/datagenerator.py). 
+estimate the weight of two species of birds. Along with `species` we have other 
+attributes such as, `color`, `beak_ratio`, `claw_length`, and `wing_density`. 
+The raw data is available at [data/raw-data.csv](./data/raw-data.csv). 
+
+Please note that this is fake data that was generated using the script [lib/datagenerator.py](./lib/datagenerator.py). 
 The purpose of using a fake dataset was to have a small reproducible example.
 
 The examples below assume you have installed Python along with the libraries **numpy**, 
