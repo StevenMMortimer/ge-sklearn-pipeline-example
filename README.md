@@ -51,51 +51,62 @@ You should also notice at the top-level of the project folder there are the two 
 6. [`main.py`](main.py): A single Python file that runs the main analysis for the project 
 7. [`README.md`](README.md): A file that explains what this project is about
 
-With this folder configuration we have a single Python file ([`main.py`](main.py)) that runs 
-our entire analysis, but interacts with the other folders to read and write artifacts 
-of the analysis. 
+Using this folder configuration we have a single Python file ([`main.py`](main.py)) that runs 
+our entire analysis but interacts with the other folders to read and write artifacts 
+of the analysis. The script contains code that validates data during the run against 
+expectations to ensure the integrity of the analysis.
+
 
 ---
 
 ### scikit-learn Pipeline
 
-In scikit-learn there is functionality where you can take multiple "transformers" 
-and chain them together to preprocess data and model it. The ([`main.py`](main.py)) 
-file is where these transformers preprocess the raw data located in 
-[`data/raw-data.csv`](./data/raw-data.csv). However, we introduce the Great Expectations (`ge`)  
-library in three key areas to validate assumptions about data in our pipeline: 
+In **scikit-learn** there is functionality where you can take multiple "transformers" 
+and chain them together to preprocess data and model it. The [`main.py`](main.py) 
+file is where these transformers preprocess the raw data located in [`data/raw-data.csv`](./data/raw-data.csv). 
+Here we will introduce the Great Expectations (`ge`) library in three key areas to 
+validate assumptions about data in our pipeline: 
 
 1. Use `ge` to check the raw data
 2. Use `ge` to check the data after preprocessing, which is right before modeling
 3. Use `ge` to check the difference between predicted and actuals in a holdout dataset
 
-It is pretty obvious that Great Expectations could be used to validate the input, raw data. 
-Checking preprocessed data is also helpful. This ensures that all of your transformers 
+First, it is pretty obvious that Great Expectations could be used to validate the input, raw data. 
+The phrase "garbage in, garbage out" applies here. It does not matter how good our 
+pipeline is if we put bad data into it, so we prevent that from happening.
+
+Second, checking preprocessed data is also important. This ensures that all of your transformers 
 behaved as you would expect in case they encoded data incorrectly or changed in another 
 environment if you pickle them after fitting them to data, etc. Even another analyst 
 could tweak a transformer parameter in `main.py` which is running the analysis and 
 the pipeline tests, if written correctly, should catch the change in parameters of 
 the transformers. This is extremely helpful in ensuring the data you are modeling 
-is what you expect. In the third area, we check the model errors on a holdout set. 
-This is also very helpful in ensuring that there are no extremely large errors 
-caused by outliers or shift away from a defined distribution, which is usually 
-assumed to be mean-zero with constant variance.
+is what you expect.
+
+Third, we check the model errors on a holdout set. This is also important in ensuring 
+that there are no extremely large errors caused by drift in the inputs, outliers, or a 
+decline in model performance.
+
 
 ---
 
 ### Creating Expectations
 
-In this example repo we started setting up Great Expectations by running the 
-command from the terminal: 
+To implement the three types of validation described above we started by initializing a 
+Great Expectations project by running the command below in the terminal. 
+
+**NOTE**: If you cloned this repo and are following along you can delete the 
+`great_expectations` folder and follow the instructions below. We assume you are 
+setting this up in a project where Great Expectations has not already been initialized.
 
 ```
 great_expectations init
 ```
 
-When following the prompts we declined to initialize a DataSource. Instead we 
-created the DataSources with the script [`set-datasources`](./great_expectations/notebooks/set-datasources.py). 
-This allows you to specify both at once in a consistent manner. You can always check 
-which DataAssets are available from DataSources by running the commands below 
+In the initialization prompts we declined to add a DataSource. By declining the DataSource 
+configuration we were able to quickly and consistently setup multiple DataSources by 
+running the script [`set-datasources`](./great_expectations/notebooks/set-datasources.py). 
+You can always check which DataAssets are available from DataSources by running the commands below 
 in Python. This should show the three DataAssets from the `.csv` files: 1) `raw-data`, 
 2) `modeling-data`, and 3) `holdout-error-data`.  
 
@@ -115,16 +126,16 @@ data_source: output__dir (pandas)
 ```
 
 The next step is creating expectations for these three DataAssets. The expectations 
-we used were created and stored in the following scripts: 
+we used were created by the following scripts: 
 
 1. Raw data: [./great_expectations/notebooks/create-raw-data-expectations.py](./great_expectations/notebooks/create-raw-data-expectations.py)
 2. Modeling data: [./great_expectations/notebooks/create-modeling-data-expectations.py](./great_expectations/notebooks/create-modeling-data-expectations.py)
 3. Holdout error data: [./great_expectations/notebooks/create-holdout-error-data-expectations.py](./great_expectations/notebooks/create-holdout-error-data-expectations.py)
 
-All of the expectation creation scripts follow a similar pattern where we first add the basic profiler 
-as an expectation for the DataAsset and second create expectations as the "default" suite. 
+All of the expectation creation scripts follow a similar pattern where we first add the BasicProfiler suite 
+as an expectation and then create our expectations as the "default" suite for the DataAsset.
 Those default expectations are created by loading the data from the folder as a Batch and 
-only need to be done once for the first time unless you are updating the expectations.
+only need to be done once for the first time or you are updating the expectations.
 
 The choice to use `.py` scripts instead of notebooks is purely for personal preference. 
 The scripts are stored in the notebooks folder [`./great_expectations/notebooks`](./great_expectations/notebooks) 
@@ -150,9 +161,9 @@ Successfully validated holdout error data.
 
 In this script there are sections which validate the data against the created expectations. 
 At the end of each section there is an `assert` check that the validation run was 
-successful. The process will stop if the expectations are not met. If everything 
-was successful you should see the validations of the run stored in `uncommitted/validations` 
-of your Great Expectations folder. 
+successful. The script will generate an `AssertionError` if any of the expectations are not met. 
+If the run was successful you should see the validations of the run stored in 
+`uncommitted/validations` of your Great Expectations folder. 
 
 
 ---
@@ -179,10 +190,10 @@ Traceback (most recent call last):
 AssertionError
 ```
 
-The second scenario is one where a pickled sci-kit learn transformer is loaded. 
+The second scenario is one where a pickled **scikit-learn** transformer is loaded. 
 The transformer is supposed to have been created using 2 quantile bins. However, 
-this transformer was created using 4 quartile bins so the transformed data does 
-not fall in the value set [0.0, 1.0], thus failing our expectation.
+this transformer was created using 4 quartile bins so the preprocessed raw data takes 
+values [0.0, 1.0, 2.0, 3.0] instead of the expected value set [0.0, 1.0].
 
 ```
 $ python main.py different-transformer
@@ -196,7 +207,7 @@ Traceback (most recent call last):
 AssertionError
 ```
 
-In the third scenario we make a small change to the holdout data making its value 
+In the third scenario we make a small change to the holdout data making one observation 
 an extremely large outlier (999.99) which results in a prediction error of more 
 than 100 (one of of expectations).
 
