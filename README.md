@@ -135,7 +135,7 @@ were created by the following scripts:
 All of the expectation creation scripts follow a similar pattern where we first add the BasicProfiler suite 
 as an expectation and then create our expectations as the "default" suite for the DataAsset.
 Those default expectations are created by loading the data from the folder as a Batch and 
-only need to be done once for the first time or you are updating the expectations.
+only need to be done once for the first time or when you are updating the expectations.
 
 The choice to use `.py` scripts instead of notebooks is purely for personal preference. 
 The scripts are stored in the notebooks folder [`./great_expectations/notebooks`](./great_expectations/notebooks) 
