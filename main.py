@@ -25,13 +25,13 @@ if __name__ == "__main__":
     # NOTE: The expectations for this data asset were defined in the
     # file entitled ''. That file must be run to create and save the expectation
     # suite that is being used here to validate the new batches.
-    df_raw = pd.read_csv('data/raw-data.csv')
+    raw_dat = pd.read_csv('data/raw-data.csv')
     data_asset_name = "raw-data"
     expectation_suite_name = "default"
-    batch = context.get_batch(data_asset_name, expectation_suite_name, df_raw)
+    batch = context.get_batch(data_asset_name, expectation_suite_name, raw_dat)
     run_id = datetime.utcnow().isoformat().replace(":", "") + "Z"
-    validation_result_df_raw = batch.validate(run_id=run_id)
-    assert validation_result_df_raw["success"]
+    validation_result_raw_dat = batch.validate(run_id=run_id)
+    assert validation_result_raw_dat["success"]
 
     # Transform data ----------------------------------------------------------------------
     # Now proceed to transform the data before modeling it using the concept of
@@ -39,12 +39,12 @@ if __name__ == "__main__":
 
     # Create dummy variables transformer across species and color
     ohe = OneHotEncoder(categories=[SPECIES, COLOR], drop='first', sparse=False)
-    ohe_cols = df_raw.loc[:, ['species', 'color']]
+    ohe_cols = raw_dat.loc[:, ['species', 'color']]
     ohe.fit(ohe_cols)
 
     # Create ordinal variable transformer for beak_ratio
     oe = OrdinalEncoder(categories=[BEAK_RATIO])
-    oe_cols = df_raw.loc[:, ['beak_ratio']]
+    oe_cols = raw_dat.loc[:, ['beak_ratio']]
     oe.fit(oe_cols)
 
     # Create a transformer to bin claw_length across [0, 0.2, 0.4, 0.6, 0.8, 1]
@@ -53,7 +53,7 @@ if __name__ == "__main__":
 
     # Create a transformer to bin wing_density into 2 quantiles
     kbd = KBinsDiscretizer(n_bins=2, encode='ordinal', strategy='quantile')
-    kbd_cols = df_raw.loc[:, ['wing_density']]
+    kbd_cols = raw_dat.loc[:, ['wing_density']]
     kbd.fit(kbd_cols)
 
     # String together the created transformers into a sklearn "pipeline"
@@ -85,9 +85,10 @@ if __name__ == "__main__":
     # NOTE: The transformers are fitted based on the data loaded here when
     # main.py is run, but could be pickled and loaded so that they are
     # consistent across runs and batches.
-    df_modeling = preprocess_pipeline.transform(df_raw)
-    modeling_cols = ['V' + str(x) for x in range(df_modeling.shape[1])]
-    df_modeling.to_csv('./output/modeling-data.csv', index=False, columns=modeling_cols)
+    modeling_dat = preprocess_pipeline.transform(raw_dat)
+    modeling_cols = ['V' + str(x) for x in range(modeling_dat.shape[1])]
+    modeling_dat_as_df = pd.DataFrame(modeling_dat, columns=modeling_cols)
+    modeling_dat_as_df.to_csv('./output/modeling-data.csv', index=False)
 
     # Validate modeling data ---------------------------------------------------------------
     # Check that the transformed data are what we expect before modeling
@@ -96,15 +97,14 @@ if __name__ == "__main__":
     # suite that is being used here to validate the new batches.
     data_asset_name = "modeling-data"
     expectation_suite_name = "default"
-    batch = context.get_batch(data_asset_name, expectation_suite_name,
-                              pd.DataFrame(df_modeling, columns=modeling_cols))
-    validation_result_df_modeling = batch.validate(run_id=run_id)
-    assert validation_result_df_modeling["success"]
+    batch = context.get_batch(data_asset_name, expectation_suite_name, modeling_dat_as_df)
+    validation_result_modeling_dat = batch.validate(run_id=run_id)
+    assert validation_result_modeling_dat["success"]
 
     # Model the data -----------------------------------------------------------------------
     # Split up the data into train and test, assuming last column is target
-    X = df_modeling[:, :-1]
-    y = df_modeling[:, -1]
+    X = modeling_dat[:, :-1]
+    y = modeling_dat[:, -1]
     X_train, X_test, \
         y_train, y_test = train_test_split(X, y,
                                            train_size=0.75,
@@ -127,9 +127,9 @@ if __name__ == "__main__":
 
     # Save off the holdout predictions and errors
     y_pred_tuned_forest = rf_cv.predict(X_test)
-    df_holdout_error = pd.DataFrame({'actual': y_test, 'pred': y_pred_tuned_forest})
-    df_holdout_error['error'] = df_holdout_error['actual'] - df_holdout_error['pred']
-    df_holdout_error.to_csv('./output/holdout-error-data.csv', index=False)
+    holdout_error_dat = pd.DataFrame({'actual': y_test, 'pred': y_pred_tuned_forest})
+    holdout_error_dat['error'] = holdout_error_dat['actual'] - holdout_error_dat['pred']
+    holdout_error_dat.to_csv('./output/holdout-error-data.csv', index=False)
 
     # Validate holdout errors ---------------------------------------------------------------
     # Check that the holdout errors are what we would typically see for this model
@@ -138,6 +138,6 @@ if __name__ == "__main__":
     # suite that is being used here to validate the new batches.
     data_asset_name = "holdout-error-data"
     expectation_suite_name = "default"
-    batch = context.get_batch(data_asset_name, expectation_suite_name, df_holdout_error)
-    validation_result_df_holdout_error = batch.validate(run_id=run_id)
-    assert validation_result_df_holdout_error["success"]
+    batch = context.get_batch(data_asset_name, expectation_suite_name, holdout_error_dat)
+    validation_result_holdout_error_dat = batch.validate(run_id=run_id)
+    assert validation_result_holdout_error_dat["success"]

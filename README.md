@@ -17,7 +17,7 @@ inputs, transformed data, and even the model predictions conform to an expected 
 ### Background
 
 In this example assume that we want to build a machine learning pipeline to 
-estimate the weight of two species of birds. Along with the species we have other  
+estimate the weight of two species of birds. Along with the species we have other 
 attributes such as, color, beak_ratio, claw_length, and wing_density. This is fake 
 data that was generated using the script [lib/datagenerator.py](./lib/datagenerator.py). 
 The raw data is available at [data/raw-data.csv](./data/raw-data.csv). The purpose 
@@ -38,7 +38,7 @@ the inputs and outputs:
 There are two other folders in the structure:
 
 3. [`lib`](./lib): Folder for Python scripts that hold global settings and functions
-4. [`great_expectations`](./great_expectations): Folder of configurations and artifacts for pipeline tests
+4. [`great_expectations`](./great_expectations): Folder for configurations and artifacts of pipeline tests
   
 You should also notice at the top-level of the project folder there are the two files: 
 
@@ -68,12 +68,12 @@ Checking preprocessed data is also helpful. This ensures that all of your transf
 behaved as you would expect in case they encoded data incorrectly or changed in another 
 environment if you pickle them after fitting them to data, etc. Even another analyst 
 could tweak a transformer parameter in `main.py` which is running the analysis and 
-the pipeline tests would catch the change in parameters of the transformers. This is 
-extremely helpful in ensuring the data you are modeling is what you expect. In the third 
-area, we check the model errors on a holdout set. This is also very helpful in 
-ensuring that there are no extremely large errors caused by outliers or shift away 
-from a defined distribution, which is normally assumed to be mean-zero with constant 
-variance.
+the pipeline tests, if written correctly, should catch the change in parameters of 
+the transformers. This is extremely helpful in ensuring the data you are modeling 
+is what you expect. In the third area, we check the model errors on a holdout set. 
+This is also very helpful in ensuring that there are no extremely large errors 
+caused by outliers or shift away from a defined distribution, which is usually 
+assumed to be mean-zero with constant variance.
 
 ---
 
@@ -86,10 +86,32 @@ command from the terminal:
 great_expectations init
 ```
 
-When following the prompts we declined to initialize a datasource. Instead we 
-created the datasources with the script [``](). 
+When following the prompts we declined to initialize a Datasource. Instead we 
+created the Datasources with the script [`set-datasources`](./great_expectations/notebooks/set-datasources.py). 
+This allows you to specify both at once in a consistent manner. You can always check 
+which data assets are available from the sources by running the following commands 
+in Python: 
 
+```
+import great_expectations as ge
+import great_expectations.jupyter_ux
+context = ge.data_context.DataContext()
+great_expectations.jupyter_ux.list_available_data_asset_names(context)
+```
 
+This should show the three DataAssets: 1) Raw data, 2) Modeling data, and 3) Holdout 
+Error data. The next step is creating expectations for these three DataAssets. The 
+expectations we used were created and stored in the following scripts: 
+
+1. Raw data: [./great_expectations/notebooks/create-raw-data-expectations.py](./great_expectations/notebooks/create-raw-data-expectations.py)
+2. Modeling data: [./great_expectations/notebooks/create-modeling-data-expectations.py](./great_expectations/notebooks/create-modeling-data-expectations.py)
+3. Holdout error data: [./great_expectations/notebooks/create-holdout-error-data-expectations.py](./great_expectations/notebooks/create-holdout-error-data-expectations.py)
+
+You will notice these scripts all follow a similar pattern where we add the basic profiler 
+as an expectation for the DataAsset and then create expectations as the "default" suite 
+by loading the data from the folder as a Batch. The choice to use `.py` scripts 
+instead of a notebook are purely personal taste. They are stored in the `notebooks` 
+folder for reference just like a notebook would be.  
 
 
 ---

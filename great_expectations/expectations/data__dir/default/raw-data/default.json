@@ -1,0 +1,138 @@
+{
+  "data_asset_name": "data__dir/default/raw-data",
+  "expectation_suite_name": "default",
+  "meta": {
+    "great_expectations.__version__": "0.7.7"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "species",
+          "color",
+          "beak_ratio",
+          "claw_length",
+          "wing_density",
+          "weight"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "species",
+        "type_": "str"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "color",
+        "type_": "str"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "beak_ratio",
+        "type_": "str"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "claw_length",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "wing_density",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "weight",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_table_row_count_to_equal",
+      "kwargs": {
+        "value": 16
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "species"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "color"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "beak_ratio"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "claw_length"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "wing_density"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "weight"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "species",
+        "value_set": [
+          "avis",
+          "ales"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "color",
+        "value_set": [
+          "blue",
+          "grey"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "beak_ratio",
+        "value_set": [
+          "low",
+          "moderate",
+          "high"
+        ]
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}

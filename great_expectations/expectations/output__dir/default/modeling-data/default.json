@@ -1,0 +1,163 @@
+{
+  "data_asset_name": "output__dir/default/modeling-data",
+  "expectation_suite_name": "default",
+  "meta": {
+    "great_expectations.__version__": "0.7.7"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_table_columns_to_match_ordered_list",
+      "kwargs": {
+        "column_list": [
+          "V0",
+          "V1",
+          "V2",
+          "V3",
+          "V4",
+          "V5"
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V0",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V1",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V2",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V3",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V4",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_of_type",
+      "kwargs": {
+        "column": "V5",
+        "type_": "float64"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V0"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V1"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V2"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V3"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V4"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_not_be_null",
+      "kwargs": {
+        "column": "V5"
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "V0",
+        "value_set": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "V1",
+        "value_set": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "V2",
+        "value_set": [
+          0.0,
+          1.0,
+          2.0
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "V3",
+        "value_set": [
+          0.0,
+          1.0,
+          2.0,
+          3.0,
+          4.0
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_in_set",
+      "kwargs": {
+        "column": "V4",
+        "value_set": [
+          0.0,
+          1.0
+        ]
+      }
+    },
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "V5",
+        "min_value": 100,
+        "max_value": 250
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}

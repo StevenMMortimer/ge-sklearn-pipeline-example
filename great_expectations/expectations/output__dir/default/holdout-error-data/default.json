@@ -1,0 +1,40 @@
+{
+  "data_asset_name": "output__dir/default/holdout-error-data",
+  "expectation_suite_name": "default",
+  "meta": {
+    "great_expectations.__version__": "0.7.7"
+  },
+  "expectations": [
+    {
+      "expectation_type": "expect_column_values_to_be_between",
+      "kwargs": {
+        "column": "error",
+        "min_value": -100,
+        "max_value": 100
+      }
+    },
+    {
+      "expectation_type": "expect_column_kl_divergence_to_be_less_than",
+      "kwargs": {
+        "column": "error",
+        "partition_object": {
+          "bins": [
+            -20,
+            0,
+            20
+          ],
+          "weights": [
+            0.475,
+            0.475
+          ],
+          "tail_weights": [
+            0.025,
+            0.025
+          ]
+        },
+        "threshold": 0.5
+      }
+    }
+  ],
+  "data_asset_type": "Dataset"
+}
